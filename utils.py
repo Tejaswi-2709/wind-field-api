@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from shapely import wkt
+import matplotlib
+matplotlib.use("Agg")
 
 # =========================
 # OPTIONAL CARTOPY
@@ -734,6 +736,5 @@ def plot_snap_style_wind(df,save_path=None):
 
         print(f"✅ Wind plot saved: {save_path}")
 
-    plt.show()
 
     plt.close()
