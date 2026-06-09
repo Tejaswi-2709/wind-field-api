@@ -15,9 +15,4 @@ geopandas
 shapely
 global-land-mask
 cartopy
-subprocess
-os
-glob
-rasterio
 python-multipart
-matplotlib

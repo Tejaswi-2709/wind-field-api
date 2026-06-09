@@ -9,6 +9,7 @@ def compute_metrics(df):
 
     if df is None or len(df) == 0:
         return {"mae": None, "rmse": None, "bias": None}
+    
 
     # FIX: correct column names
     if "sar_speed" not in df.columns or "era5_speed" not in df.columns:
