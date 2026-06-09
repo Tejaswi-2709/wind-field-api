@@ -10,11 +10,7 @@ from era5 import load_era5_wind_new,get_era5_file
 from downloader import get_sentinel_safe,RAW_DIR
 from utils import build_safe_graph,snap_to_dataframe
 from validation import match_sar_era5,compute_metrics
-import importlib
-import era5
-importlib.reload(era5)
 import os
-print("RUNNING PIPELINE FROM:", os.path.abspath(__file__))
 # =====================================================
 # SAFE SNAP RUNNER (FIXED CONTRACT)
 # =====================================================
