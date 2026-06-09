@@ -1,0 +1,12 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+.env
+
+# Data folders (your large files)
+Data/
+graphs/
+outputs/
