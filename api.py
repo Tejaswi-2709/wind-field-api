@@ -1,68 +1,76 @@
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List
-import random
-import time
-import math
+import os
+
+from main import run_job
 
 app = FastAPI(title="Wind Extraction API")
 
+OUTPUT_DIR = "outputs"
 
+
+# =========================
+# REQUEST MODEL
+# =========================
 class WindRequest(BaseModel):
     date: str
     bbox: List[float]
     save_debug: bool = False
 
 
-@app.get("/")
-def root():
-    return {
-        "message": "Wind Field API Running"
-    }
-
-
+# =========================
+# RUN PIPELINE
+# =========================
 @app.post("/extract")
 def extract_wind(request: WindRequest):
 
-    # simulate processing time
-    time.sleep(2)
+    result = run_job(
+        date=request.date,
+        bbox=request.bbox,
+        save_debug=request.save_debug
+    )
 
-    min_lon, min_lat, max_lon, max_lat = request.bbox
-
-    # generate sample wind vectors
-    sample_vectors = []
-
-    for i in range(5):
-
-        lat = round(random.uniform(min_lat, max_lat), 4)
-        lon = round(random.uniform(min_lon, max_lon), 4)
-
-        speed = round(random.uniform(5, 15), 2)
-        direction = round(random.uniform(0, 360), 2)
-
-        u = round(speed * math.cos(math.radians(direction)), 2)
-        v = round(speed * math.sin(math.radians(direction)), 2)
-
-        sample_vectors.append({
-            "lat": lat,
-            "lon": lon,
-            "wind_speed": speed,
-            "wind_direction": direction,
-            "u": u,
-            "v": v
-        })
+    if result["status"] != "success":
+        return {
+            "message": "Pipeline failed",
+            "error": result.get("error")
+        }
 
     return {
-        "status": "success",
         "message": "Wind extraction completed",
-        "input_date": request.date,
-        "bbox": request.bbox,
-        "summary": {
-            "points_processed": len(sample_vectors),
-            "mean_wind_speed": round(
-                sum(v["wind_speed"] for v in sample_vectors) / len(sample_vectors),
-                2
+        "result": {
+            "status": result["status"],
+            "summary": result["summary"],
+
+            # download links
+            "plot_url": (
+                f"/download/{os.path.basename(result['plot_path'])}"
+                if result.get("plot_path")
+                else None
+            ),
+
+            "csv_url": (
+                f"/download/{os.path.basename(result['csv_path'])}"
             )
-        },
-        "sample_vectors": sample_vectors
+        }
     }
+
+
+# =========================
+# DOWNLOAD ENDPOINT
+# =========================
+@app.get("/download/{filename}")
+def download_file(filename: str):
+
+    file_path = os.path.join(OUTPUT_DIR, filename)
+
+    if not os.path.exists(file_path):
+        return {"error": "File not found"}
+
+    return FileResponse(
+        path=file_path,
+        filename=filename,
+        media_type="application/octet-stream"
+    )
