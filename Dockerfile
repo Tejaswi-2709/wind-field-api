@@ -3,13 +3,24 @@ FROM python:3.11-slim
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
-    default-jre \
+    build-essential \
+    gcc \
+    g++ \
+    gfortran \
+    libgeos-dev \
+    libproj-dev \
+    proj-data \
+    proj-bin \
     gdal-bin \
     libgdal-dev \
-    build-essential \
+    libspatialindex-dev \
+    libgl1 \
+    default-jre \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
+
+RUN pip install --upgrade pip
 
 RUN pip install --no-cache-dir -r requirements.txt
 
